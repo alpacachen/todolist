@@ -9,6 +9,7 @@ const LOCAL_KEY = "TDL";
 const generateItem = (value: string): TodoItem => ({
 	value,
 	id: uuidv4(),
+	createTime: new Date().getTime(),
 	level: TodoItemLevel.mid,
 	checked: false,
 });
@@ -39,6 +40,9 @@ const useHook = () => {
 			setList(res);
 		}
 	};
-	return { save, deleteItem, list, changeLevel, check, total, checkedLength };
+	const sortedUnCheckedList = list.filter((o) => !o.checked).sort((a, b) => b.createTime - a.createTime);
+	const sortedCheckedList = list.filter((o) => o.checked).sort((a, b) => b.createTime - a.createTime);
+	const sortedList = [...sortedUnCheckedList, ...sortedCheckedList];
+	return { save, deleteItem, list, changeLevel, check, total, checkedLength, sortedList };
 };
 export const [DataProvider, useData] = constate(useHook);

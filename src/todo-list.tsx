@@ -63,14 +63,14 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 };
 
 export const TodoList = () => {
-	const { list } = useData();
+	const { sortedList } = useData();
 	return (
 		<List
 			className="overflow-auto"
-			dataSource={list}
+			dataSource={sortedList}
 			itemLayout="horizontal"
 			renderItem={(item) => (
-				<List.Item className="group">
+				<List.Item className="group ">
 					<List.Item.Meta description={<ListItemDescription item={item} />} />
 				</List.Item>
 			)}

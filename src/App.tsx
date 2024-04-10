@@ -1,8 +1,8 @@
 import { ConfigProvider } from "antd";
 import React from "react";
 import { Background } from "./background";
-import { Popup } from "./Popup";
 import { DataProvider } from "./context";
+import { Popup } from "./popup";
 
 const App: React.FC = () => (
 	<ConfigProvider
