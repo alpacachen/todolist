@@ -12,6 +12,7 @@
   "dependencies": {
     "@ant-design/happy-work-theme": "^1.0.0",
     "@ant-design/icons": "^5.3.6",
+    "@hello-pangea/dnd": "^16.6.0",
     "@types/lodash-es": "^4.17.12",
     "antd": "^5.16.1",
     "classnames": "^2.5.1",

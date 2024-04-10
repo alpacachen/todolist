@@ -40,9 +40,7 @@ const useHook = () => {
 			setList(res);
 		}
 	};
-	const sortedUnCheckedList = list.filter((o) => !o.checked).sort((a, b) => b.createTime - a.createTime);
-	const sortedCheckedList = list.filter((o) => o.checked).sort((a, b) => b.createTime - a.createTime);
-	const sortedList = [...sortedUnCheckedList, ...sortedCheckedList];
+	const sortedList = list.sort((a, b) => b.createTime - a.createTime)
 	return { save, deleteItem, list, changeLevel, check, total, checkedLength, sortedList };
 };
 export const [DataProvider, useData] = constate(useHook);

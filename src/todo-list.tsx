@@ -1,10 +1,11 @@
 import { FC } from "react";
 import { useData } from "./context";
-import { Badge, Button, Checkbox, List, Popover } from "antd";
+import { Badge, Button, Checkbox, Popover } from "antd";
 import { TodoItem, TodoItemLevel } from "./type";
 import { HappyProvider } from "@ant-design/happy-work-theme";
 import { DeleteFilled } from "@ant-design/icons";
 import classNames from "classnames";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 	const { check, changeLevel, deleteItem } = useData();
@@ -63,17 +64,35 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 };
 
 export const TodoList = () => {
-	const { sortedList } = useData();
+	const { list } = useData();
 	return (
-		<List
-			className="overflow-auto"
-			dataSource={sortedList}
-			itemLayout="horizontal"
-			renderItem={(item) => (
-				<List.Item className="group ">
-					<List.Item.Meta description={<ListItemDescription item={item} />} />
-				</List.Item>
-			)}
-		/>
+		<DragDropContext onDragEnd={console.log}>
+			<Droppable droppableId="droppable">
+				{(provided) => <div
+					className="overflow-y-auto"
+					{...provided.droppableProps}
+					ref={provided.innerRef}
+				>
+					{list.map((item, index) => (
+						<Draggable key={item.id} draggableId={item.id} index={index}>
+							{(provided, snapshot) => (
+								<div
+									ref={provided.innerRef}
+									key={item.id}
+									className={classNames("hover:bg-gray-100 px-4 py-2 user-select-none", snapshot.isDragging && 'bg-gray-100')}
+									{...provided.draggableProps}
+									{...provided.dragHandleProps}
+									style={provided.draggableProps.style}
+								>
+									<ListItemDescription item={item} />
+								</div>
+							)}
+						</Draggable>
+					))}
+					{provided.placeholder}
+				</div>
+				}
+			</Droppable>
+		</DragDropContext>
 	);
 };
