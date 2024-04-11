@@ -6,7 +6,6 @@ export enum TodoItemLevel {
 export interface TodoItem {
 	value: string;
 	checked: boolean;
-	createTime: number;
 	level: TodoItemLevel;
 	id: string;
 }

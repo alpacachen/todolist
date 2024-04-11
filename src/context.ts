@@ -1,15 +1,16 @@
 import constate from "constate";
 import { useLocalStorage } from "usehooks-ts";
-import { cloneDeep } from "lodash-es";
+import { cloneDeep, isNil } from "lodash-es";
 import { TodoItem, TodoItemLevel } from "./type";
 import { v4 as uuidv4 } from "uuid";
+import { useCallback } from "react";
+import { DropResult } from "@hello-pangea/dnd";
 
 const LOCAL_KEY = "TDL";
 
 const generateItem = (value: string): TodoItem => ({
 	value,
 	id: uuidv4(),
-	createTime: new Date().getTime(),
 	level: TodoItemLevel.mid,
 	checked: false,
 });
@@ -17,7 +18,7 @@ const generateItem = (value: string): TodoItem => ({
 const useHook = () => {
 	const [list, setList] = useLocalStorage<TodoItem[]>(LOCAL_KEY, []);
 	const save = (value: string) => {
-		setList((l) => [...(l ?? []), generateItem(value)]);
+		setList((l) => [generateItem(value), ...(l ?? [])]);
 	};
 	const check = (id: string, checked: boolean) => {
 		const res = cloneDeep(list);
@@ -40,7 +41,20 @@ const useHook = () => {
 			setList(res);
 		}
 	};
-	const sortedList = list.sort((a, b) => b.createTime - a.createTime)
-	return { save, deleteItem, list, changeLevel, check, total, checkedLength, sortedList };
+
+	const onDragEnd = useCallback((result: DropResult) => {
+		const { source, destination } = result
+		const sourceIndex = source.index
+		const destinationIndex = destination?.index
+		if (isNil(destinationIndex)) {
+			return
+		}
+		const res = cloneDeep(list)
+		const [removed] = res.splice(sourceIndex, 1)
+		res.splice(destinationIndex, 0, removed)
+		setList(res)
+	}, [list, setList])
+
+	return { save, deleteItem, list, changeLevel, check, total, checkedLength, onDragEnd };
 };
 export const [DataProvider, useData] = constate(useHook);

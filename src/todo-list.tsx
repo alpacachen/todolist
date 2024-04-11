@@ -10,11 +10,11 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 	const { check, changeLevel, deleteItem } = useData();
 	return (
-		<div className="flex gap-4">
+		<div className="flex gap-4 items-center">
 			<HappyProvider>
 				<Checkbox checked={item.checked} onChange={(e) => check(item.id, e.target.checked)} />
 			</HappyProvider>
-			<span className={classNames(item.checked && "decoration-line-through", "truncate flex-1 w-0")}>{item.value}</span>
+			<span className={classNames(item.checked && "decoration-line-through", "color-gray truncate flex-1 w-0")}>{item.value}</span>
 			<span className="w-0 overflow-hidden group-hover:w-auto">
 				<Button size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteFilled />} />
 			</span>
@@ -22,7 +22,7 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 				placement="right"
 				trigger={"click"}
 				content={
-					<div className="flex gap-4">
+					<div className="flex gap-2">
 						<Button
 							onClick={() => {
 								changeLevel(item.id, TodoItemLevel.high);
@@ -64,12 +64,12 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 };
 
 export const TodoList = () => {
-	const { list } = useData();
+	const { list, onDragEnd } = useData();
 	return (
-		<DragDropContext onDragEnd={console.log}>
+		<DragDropContext onDragEnd={onDragEnd}>
 			<Droppable droppableId="droppable">
 				{(provided) => <div
-					className="overflow-y-auto"
+					className="overflow-y-auto -mx-60px"
 					{...provided.droppableProps}
 					ref={provided.innerRef}
 				>
@@ -79,7 +79,7 @@ export const TodoList = () => {
 								<div
 									ref={provided.innerRef}
 									key={item.id}
-									className={classNames("hover:bg-gray-100 px-4 py-2 user-select-none", snapshot.isDragging && 'bg-gray-100')}
+									className={classNames("px-60px group py-2 user-select-none", snapshot.isDragging && 'shadow rounded-4px bg-white')}
 									{...provided.draggableProps}
 									{...provided.dragHandleProps}
 									style={provided.draggableProps.style}
