@@ -35,6 +35,7 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 				onCompositionEnd={() => (typing.current = false)}
 				onKeyDown={onKeyDown} autoFocus onBlur={() => setEditing(false)} />}
 			{!editing && <span onDoubleClick={() => setEditing(true)} className={classNames(item.checked && "decoration-line-through", "color-gray truncate flex-1 w-0")}>{item.value}</span>}
+			{!editing && item.daily && <Tooltip title='每日任务，0 点重置'><CarryOutOutlined className="color-gray" /></Tooltip>}
 			{!editing && <Popover
 				placement="right"
 				trigger={"click"}
