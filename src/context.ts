@@ -3,8 +3,9 @@ import { useLocalStorage } from "usehooks-ts";
 import { cloneDeep, isNil } from "lodash-es";
 import { TodoItem, TodoItemLevel } from "./type";
 import { v4 as uuidv4 } from "uuid";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { DropResult } from "@hello-pangea/dnd";
+import { isBefore, startOfToday } from 'date-fns'
 
 const LOCAL_KEY = "TDL";
 
@@ -16,6 +17,24 @@ const generateItem = (value: string): TodoItem => ({
 });
 
 const useHook = () => {
+	useEffect(() => {
+		// 每次检查列表，如果是每日任务，且完成时间是昨天，那么就重置
+		const list = JSON.parse(window.localStorage.getItem(LOCAL_KEY) ?? "[]")
+		const res = list.map((o: TodoItem) => {
+			if (o.daily && o.completedTime) {
+				if (isBefore(o.completedTime, startOfToday())) {
+					return {
+						...o,
+						checked: false,
+						completedTime: undefined
+					}
+				}
+				return o
+			}
+			return o
+		})
+		window.localStorage.setItem(LOCAL_KEY, JSON.stringify(res))
+	}, [])
 	const [list, setList] = useLocalStorage<TodoItem[]>(LOCAL_KEY, []);
 	const save = (value: string) => {
 		setList((l) => [generateItem(value), ...(l ?? [])]);
@@ -25,6 +44,9 @@ const useHook = () => {
 		const target = res.find((o) => o.id == id);
 		if (target) {
 			target.checked = checked;
+			if (target.daily) {
+				target.completedTime = Date.now()
+			}
 			setList(res);
 		}
 	};
@@ -46,7 +68,10 @@ const useHook = () => {
 	};
 	const changeValue = (id: string, value: string) => {
 		changeProp(id, 'value', value)
+	}
 
+	const changeDaily = (id: string, value: boolean) => {
+		changeProp(id, 'daily', value)
 	}
 
 	const onDragEnd = useCallback((result: DropResult) => {
@@ -62,6 +87,6 @@ const useHook = () => {
 		setList(res)
 	}, [list, setList])
 
-	return { save, deleteItem, list, changeValue, changeLevel, check, total, checkedLength, onDragEnd };
+	return { save, deleteItem, list, changeValue, changeDaily, changeLevel, check, total, checkedLength, onDragEnd };
 };
 export const [DataProvider, useData] = constate(useHook);

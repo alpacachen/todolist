@@ -1,14 +1,14 @@
 import { FC, useCallback, useState, KeyboardEvent, useRef } from "react";
 import { useData } from "./context";
-import { Badge, Button, Checkbox, Input, Popover } from "antd";
+import { Badge, Button, Checkbox, Input, Popover, Tooltip } from "antd";
 import { TodoItem, TodoItemLevel } from "./type";
 import { HappyProvider } from "@ant-design/happy-work-theme";
-import { DeleteFilled } from "@ant-design/icons";
+import { CalendarOutlined, CarryOutOutlined, DeleteOutlined } from "@ant-design/icons";
 import classNames from "classnames";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
-	const { check, changeLevel, changeValue, deleteItem } = useData();
+	const { check, changeLevel, changeValue, changeDaily, deleteItem } = useData();
 	const [editing, setEditing] = useState(false)
 	const typing = useRef(false)
 	const onKeyDown = useCallback((e: KeyboardEvent) => {
@@ -30,18 +30,16 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 				<Checkbox checked={item.checked} onChange={(e) => check(item.id, e.target.checked)} />
 			</HappyProvider>
 			{editing && <Input
+				defaultValue={item.value}
 				onCompositionStart={() => (typing.current = true)}
 				onCompositionEnd={() => (typing.current = false)}
 				onKeyDown={onKeyDown} autoFocus onBlur={() => setEditing(false)} />}
 			{!editing && <span onDoubleClick={() => setEditing(true)} className={classNames(item.checked && "decoration-line-through", "color-gray truncate flex-1 w-0")}>{item.value}</span>}
-			{!editing && <>
-				<span className="w-0 overflow-hidden group-hover:w-auto">
-					<Button size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteFilled />} />
-				</span>
-				<Popover
-					placement="right"
-					trigger={"click"}
-					content={
+			{!editing && <Popover
+				placement="right"
+				trigger={"click"}
+				content={
+					<div className="flex items-center flex-col gap-2">
 						<div className="flex gap-2">
 							<Button
 								onClick={() => {
@@ -71,15 +69,21 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 								<Badge color="blue" />
 							</Button>
 						</div>
-					}
-				>
-					<Button className="flex h-min items-center shrink-0" size="small" type="text">
-						{item.level == TodoItemLevel.high && <Badge color="red" />}
-						{item.level == TodoItemLevel.mid && <Badge color="yellow" />}
-						{item.level == TodoItemLevel.low && <Badge color="blue" />}
-					</Button>
-				</Popover>
-			</>}
+						<Tooltip title='删除'>
+							<Button size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteOutlined />} />
+						</Tooltip>
+						<Tooltip title={item.daily ? '取消设置每日任务' : '设置每日任务'}>
+							<Button size="small" type="text" onClick={() => changeDaily(item.id, !item.daily)} icon={item.daily ? <CarryOutOutlined /> : <CalendarOutlined />} />
+						</Tooltip>
+					</div>
+				}
+			>
+				<Button className="flex h-min items-center shrink-0" size="small" type="text">
+					{item.level == TodoItemLevel.high && <Badge color="red" />}
+					{item.level == TodoItemLevel.mid && <Badge color="yellow" />}
+					{item.level == TodoItemLevel.low && <Badge color="blue" />}
+				</Button>
+			</Popover>}
 		</div>
 	);
 };
