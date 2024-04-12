@@ -30,6 +30,9 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 				<Checkbox checked={item.checked} onChange={(e) => check(item.id, e.target.checked)} />
 			</HappyProvider>
 			{editing && <Input
+				autoComplete="off"
+				autoCapitalize="off"
+				autoCorrect="off"
 				defaultValue={item.value}
 				onCompositionStart={() => (typing.current = true)}
 				onCompositionEnd={() => (typing.current = false)}
@@ -71,10 +74,10 @@ const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
 							</Button>
 						</div>
 						<Tooltip title='删除'>
-							<Button size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteOutlined />} />
+							<Button className="color-gray" size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteOutlined />} />
 						</Tooltip>
-						<Tooltip title={item.daily ? '取消设置每日任务' : '设置每日任务'}>
-							<Button size="small" type="text" onClick={() => changeDaily(item.id, !item.daily)} icon={item.daily ? <CarryOutOutlined /> : <CalendarOutlined />} />
+						<Tooltip title={item.daily ? '取消每日任务' : '每日任务'}>
+							<Button className="color-gray" size="small" type="text" onClick={() => changeDaily(item.id, !item.daily)} icon={item.daily ? <CarryOutOutlined /> : <CalendarOutlined />} />
 						</Tooltip>
 					</div>
 				}
