@@ -33,14 +33,21 @@ const useHook = () => {
 	const deleteItem = (id: string) => {
 		setList((r) => r.filter((o) => o.id !== id));
 	};
-	const changeLevel = (id: string, level: TodoItemLevel) => {
+	const changeProp = useCallback(<K extends keyof TodoItem>(id: string, prop: K, value: TodoItem[K]) => {
 		const res = cloneDeep(list);
 		const target = res.find((o) => o.id == id);
 		if (target) {
-			target.level = level;
+			target[prop] = value;
 			setList(res);
 		}
+	}, [list, setList]);
+	const changeLevel = (id: string, level: TodoItemLevel) => {
+		changeProp(id, 'level', level)
 	};
+	const changeValue = (id: string, value: string) => {
+		changeProp(id, 'value', value)
+
+	}
 
 	const onDragEnd = useCallback((result: DropResult) => {
 		const { source, destination } = result
@@ -55,6 +62,6 @@ const useHook = () => {
 		setList(res)
 	}, [list, setList])
 
-	return { save, deleteItem, list, changeLevel, check, total, checkedLength, onDragEnd };
+	return { save, deleteItem, list, changeValue, changeLevel, check, total, checkedLength, onDragEnd };
 };
 export const [DataProvider, useData] = constate(useHook);

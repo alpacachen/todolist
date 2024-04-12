@@ -1,6 +1,6 @@
-import { FC } from "react";
+import { FC, useCallback, useState, KeyboardEvent, useRef } from "react";
 import { useData } from "./context";
-import { Badge, Button, Checkbox, Popover } from "antd";
+import { Badge, Button, Checkbox, Input, Popover } from "antd";
 import { TodoItem, TodoItemLevel } from "./type";
 import { HappyProvider } from "@ant-design/happy-work-theme";
 import { DeleteFilled } from "@ant-design/icons";
@@ -8,57 +8,78 @@ import classNames from "classnames";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const ListItemDescription: FC<{ item: TodoItem }> = ({ item }) => {
-	const { check, changeLevel, deleteItem } = useData();
+	const { check, changeLevel, changeValue, deleteItem } = useData();
+	const [editing, setEditing] = useState(false)
+	const typing = useRef(false)
+	const onKeyDown = useCallback((e: KeyboardEvent) => {
+		if (typing.current) {
+			return
+		}
+		switch (e.key) {
+			case "Enter":
+			case "Escape":
+				// @ts-expect-error value
+				changeValue(item.id, e.target.value);
+				setEditing(false)
+				break
+		}
+	}, [changeValue, item.id])
 	return (
-		<div className="flex gap-4 items-center">
+		<div className="flex gap-4 h-8 items-center">
 			<HappyProvider>
 				<Checkbox checked={item.checked} onChange={(e) => check(item.id, e.target.checked)} />
 			</HappyProvider>
-			<span className={classNames(item.checked && "decoration-line-through", "color-gray truncate flex-1 w-0")}>{item.value}</span>
-			<span className="w-0 overflow-hidden group-hover:w-auto">
-				<Button size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteFilled />} />
-			</span>
-			<Popover
-				placement="right"
-				trigger={"click"}
-				content={
-					<div className="flex gap-2">
-						<Button
-							onClick={() => {
-								changeLevel(item.id, TodoItemLevel.high);
-							}}
-							size="small"
-							type="text"
-						>
-							<Badge color="red" />
-						</Button>
-						<Button
-							onClick={() => {
-								changeLevel(item.id, TodoItemLevel.mid);
-							}}
-							size="small"
-							type="text"
-						>
-							<Badge color="yellow" />
-						</Button>
-						<Button
-							onClick={() => {
-								changeLevel(item.id, TodoItemLevel.low);
-							}}
-							size="small"
-							type="text"
-						>
-							<Badge color="blue" />
-						</Button>
-					</div>
-				}
-			>
-				<Button className="flex h-min items-center shrink-0" size="small" type="text">
-					{item.level == TodoItemLevel.high && <Badge color="red" />}
-					{item.level == TodoItemLevel.mid && <Badge color="yellow" />}
-					{item.level == TodoItemLevel.low && <Badge color="blue" />}
-				</Button>
-			</Popover>
+			{editing && <Input
+				onCompositionStart={() => (typing.current = true)}
+				onCompositionEnd={() => (typing.current = false)}
+				onKeyDown={onKeyDown} autoFocus onBlur={() => setEditing(false)} />}
+			{!editing && <span onDoubleClick={() => setEditing(true)} className={classNames(item.checked && "decoration-line-through", "color-gray truncate flex-1 w-0")}>{item.value}</span>}
+			{!editing && <>
+				<span className="w-0 overflow-hidden group-hover:w-auto">
+					<Button size="small" type="text" onClick={() => deleteItem(item.id)} icon={<DeleteFilled />} />
+				</span>
+				<Popover
+					placement="right"
+					trigger={"click"}
+					content={
+						<div className="flex gap-2">
+							<Button
+								onClick={() => {
+									changeLevel(item.id, TodoItemLevel.high);
+								}}
+								size="small"
+								type="text"
+							>
+								<Badge color="red" />
+							</Button>
+							<Button
+								onClick={() => {
+									changeLevel(item.id, TodoItemLevel.mid);
+								}}
+								size="small"
+								type="text"
+							>
+								<Badge color="yellow" />
+							</Button>
+							<Button
+								onClick={() => {
+									changeLevel(item.id, TodoItemLevel.low);
+								}}
+								size="small"
+								type="text"
+							>
+								<Badge color="blue" />
+							</Button>
+						</div>
+					}
+				>
+					<Button className="flex h-min items-center shrink-0" size="small" type="text">
+						{item.level == TodoItemLevel.high && <Badge color="red" />}
+						{item.level == TodoItemLevel.mid && <Badge color="yellow" />}
+						{item.level == TodoItemLevel.low && <Badge color="blue" />}
+					</Button>
+				</Popover>
+			</>}
 		</div>
 	);
 };
