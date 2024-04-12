@@ -8,6 +8,7 @@ import { DropResult } from "@hello-pangea/dnd";
 import { isBefore, startOfToday } from 'date-fns'
 
 const LOCAL_KEY = "TDL";
+const LOCAL_KEY_W = "TDLW";
 
 const generateItem = (value: string): TodoItem => ({
 	value,
@@ -36,6 +37,8 @@ const useHook = () => {
 		window.localStorage.setItem(LOCAL_KEY, JSON.stringify(res))
 	}, [])
 	const [list, setList] = useLocalStorage<TodoItem[]>(LOCAL_KEY, []);
+	const [width, setWidth] = useLocalStorage<number>(LOCAL_KEY_W, 518);
+
 	const save = (value: string) => {
 		setList((l) => [generateItem(value), ...(l ?? [])]);
 	};
@@ -44,9 +47,7 @@ const useHook = () => {
 		const target = res.find((o) => o.id == id);
 		if (target) {
 			target.checked = checked;
-			if (target.daily) {
-				target.completedTime = Date.now()
-			}
+			target.completedTime = Date.now()
 			setList(res);
 		}
 	};
@@ -87,6 +88,6 @@ const useHook = () => {
 		setList(res)
 	}, [list, setList])
 
-	return { save, deleteItem, list, changeValue, changeDaily, changeLevel, check, total, checkedLength, onDragEnd };
+	return { width, setWidth, save, deleteItem, list, changeValue, changeDaily, changeLevel, check, total, checkedLength, onDragEnd };
 };
 export const [DataProvider, useData] = constate(useHook);
